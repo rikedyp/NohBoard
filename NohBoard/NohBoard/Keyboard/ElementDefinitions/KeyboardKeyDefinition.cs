@@ -41,6 +41,18 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
         public string ShiftText { get; private set; }
 
         /// <summary>
+        /// The text  that should be shown if shift is pressed.
+        /// </summary>
+        [DataMember]
+        public string AltGrText { get; private set; }
+
+        /// <summary>
+        /// The text  that should be shown if shift is pressed.
+        /// </summary>
+        [DataMember]
+        public string AltGrShiftText { get; private set; }
+
+        /// <summary>
         /// Indicates whether the <see cref="ShiftText"/> should be shown when caps lock is pressed or not.
         /// </summary>
         /// <remarks>This is typically enabled for letters, but disabled for numbers.</remarks>
@@ -57,6 +69,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
         /// <param name="keyCodes">The keycodes.</param>
         /// <param name="normalText">The normal text.</param>
         /// <param name="shiftText">The shift text.</param>
+        /// <param name="altGrText">The altGr text.</param>
+        /// <param name="altGrShiftText">The altGrShift text.</param>
         /// <param name="changeOnCaps">Whether to change to shift text on caps lock.</param>
         /// <param name="textPosition">The new text position.
         /// If not provided, the new position will be recalculated from the bounding box of the key.</param>
@@ -67,11 +81,15 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
             List<int> keyCodes,
             string normalText,
             string shiftText,
+            string altGrText,
+            string altGrShiftText,
             bool changeOnCaps,
             TPoint textPosition = null,
             ElementManipulation manipulation = null) : base(id, boundaries, keyCodes, normalText, textPosition, manipulation)
         {
             this.ShiftText = shiftText;
+            this.AltGrText = altGrText;
+            this.AltGrShiftText = altGrShiftText;
             this.ChangeOnCaps = changeOnCaps;
         }
 
@@ -83,14 +101,14 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
         /// <param name="pressed">A value indicating whether to render the key in its pressed state or not.</param>
         /// <param name="shift">A value indicating whether shift is pressed during the render.</param>
         /// <param name="capsLock">A value indicating whether caps lock is pressed during the render.</param>
-        public void Render(Graphics g, bool pressed, bool shift, bool capsLock)
+        public void Render(Graphics g, bool pressed, bool shift, bool altGr, bool capsLock)
         {
             var style = GlobalSettings.CurrentStyle.TryGetElementStyle<KeyStyle>(this.Id)
                             ?? GlobalSettings.CurrentStyle.DefaultKeyStyle;
             var defaultStyle = GlobalSettings.CurrentStyle.DefaultKeyStyle;
             var subStyle = pressed ? style?.Pressed ?? defaultStyle.Pressed: style?.Loose ?? defaultStyle.Loose;
 
-            var txtSize = g.MeasureString(this.GetText(shift, capsLock), subStyle.Font);
+            var txtSize = g.MeasureString(this.GetText(shift, altGr, capsLock), subStyle.Font);
             var txtPoint = new TPoint(
                 this.TextPosition.X - (int)(txtSize.Width / 2),
                 this.TextPosition.Y - (int)(txtSize.Height / 2));
@@ -101,7 +119,7 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
 
             // Draw the text
             g.SetClip(this.GetBoundingBox());
-            g.DrawString(this.GetText(shift, capsLock), subStyle.Font, new SolidBrush(subStyle.Text), (Point)txtPoint);
+            g.DrawString(this.GetText(shift, altGr, capsLock), subStyle.Font, new SolidBrush(subStyle.Text), (Point)txtPoint);
             g.ResetClip();
 
             // Draw the outline.
@@ -145,6 +163,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 this.TextPosition.Translate(dx, dy),
                 this.CurrentManipulation);
@@ -165,14 +185,14 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
             var defaultStyle = GlobalSettings.CurrentStyle.DefaultKeyStyle;
             var subStyle = style?.Loose ?? defaultStyle.Loose;
 
-            var txtSize = g.MeasureString(this.GetText(false, false), subStyle.Font);
+            var txtSize = g.MeasureString(this.GetText(false, false, false), subStyle.Font);
             var txtPoint = new TPoint(
                 this.TextPosition.X - (int)(txtSize.Width / 2),
                 this.TextPosition.Y - (int)(txtSize.Height / 2));
 
             // Draw the text
             g.SetClip(this.GetBoundingBox());
-            g.DrawString(this.GetText(false, false), subStyle.Font, new SolidBrush(subStyle.Text), (Point)txtPoint);
+            g.DrawString(this.GetText(false, false, false), subStyle.Font, new SolidBrush(subStyle.Text), (Point)txtPoint);
             g.ResetClip();
 
         }
@@ -194,6 +214,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 GlobalSettings.Settings.UpdateTextPosition ? null : this.TextPosition,
                 this.CurrentManipulation);
@@ -212,6 +234,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 this.TextPosition + diff,
                 this.CurrentManipulation);
@@ -243,6 +267,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 GlobalSettings.Settings.UpdateTextPosition ? null : this.TextPosition,
                 this.CurrentManipulation);
@@ -267,6 +293,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 GlobalSettings.Settings.UpdateTextPosition ? null : this.TextPosition,
                 this.RelevantManipulation);
@@ -292,6 +320,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 GlobalSettings.Settings.UpdateTextPosition ? null : this.TextPosition,
                 this.CurrentManipulation);
@@ -331,7 +361,7 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
         /// <param name="textPosition">The new text position, or <c>null</c> if not changed.</param>
         /// <returns>The new element definition.</returns>
         public KeyboardKeyDefinition Modify(
-            List<TPoint> boundaries = null, List<int> keyCodes = null, string text = null, string shiftText = null,
+            List<TPoint> boundaries = null, List<int> keyCodes = null, string text = null, string shiftText = null, string altGrText = null, string altGrShiftText = null,
             bool? changeOnCaps = null, TPoint textPosition = null)
         {
             return new KeyboardKeyDefinition(
@@ -340,6 +370,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 keyCodes ?? this.KeyCodes.ToList(),
                 text ?? this.Text,
                 shiftText ?? this.ShiftText,
+                altGrText ?? this.AltGrText,
+                altGrShiftText ?? this.AltGrShiftText,
                 changeOnCaps ?? this.ChangeOnCaps,
                 textPosition ?? this.TextPosition,
                 this.CurrentManipulation);
@@ -356,7 +388,7 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
         /// <param name="shift">Whether shift is pressed.</param>
         /// <param name="capsLock">Whether caps lock is active.</param>
         /// <returns>The text to display for this key.</returns>
-        private string GetText(bool shift, bool capsLock)
+        private string GetText(bool shift, bool altGr, bool capsLock)
         {
             if (GlobalSettings.Settings.Capitalization != CapitalizationMethod.FollowKeys)
             {
@@ -372,7 +404,7 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
             }
 
             var capitalize = this.ChangeOnCaps && (capsLock ^ shift) || !this.ChangeOnCaps && shift;
-            return capitalize ? this.ShiftText : this.Text;
+            return altGr ? shift ? this.AltGrShiftText : this.AltGrText : capitalize ? this.ShiftText : this.Text;
         }
 
         /// <summary>
@@ -404,6 +436,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes,
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps);
         }
 
@@ -419,6 +453,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
                 this.KeyCodes.ToList(),
                 this.Text,
                 this.ShiftText,
+                this.AltGrText,
+                this.AltGrShiftText,
                 this.ChangeOnCaps,
                 this.TextPosition,
                 this.CurrentManipulation);
@@ -435,6 +471,8 @@ namespace ThoNohT.NohBoard.Keyboard.ElementDefinitions
 
             if (this.Text != kkd.Text) return true;
             if (this.ShiftText != kkd.ShiftText) return true;
+            if (this.AltGrText != kkd.AltGrText) return true;
+            if (this.AltGrShiftText != kkd.AltGrShiftText) return true;
             if (this.ChangeOnCaps != kkd.ChangeOnCaps) return true;
             if (this.TextPosition.IsChanged(kkd.TextPosition)) return true;
             if (!this.KeyCodes.ToSet().SetEquals(kkd.KeyCodes)) return true;

@@ -79,6 +79,8 @@ namespace ThoNohT.NohBoard.Forms.Properties
         {
             this.txtText.Text = this.initialDefinition.Text;
             this.txtShiftText.Text = this.initialDefinition.ShiftText;
+            this.txtAltGrText.Text = this.initialDefinition.AltGrText;
+            this.txtAltGrShiftText.Text = this.initialDefinition.AltGrShiftText;
             this.txtTextPosition.X = this.initialDefinition.TextPosition.X;
             this.txtTextPosition.Y = this.initialDefinition.TextPosition.Y;
             this.lstBoundaries.Items.AddRange(this.initialDefinition.Boundaries.Cast<object>().ToArray());

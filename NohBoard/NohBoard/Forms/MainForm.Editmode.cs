@@ -523,6 +523,8 @@ namespace ThoNohT.NohBoard.Forms
                     new List<int>(),
                     "",
                     "",
+                    "",
+                    "",
                     true));
         }
 

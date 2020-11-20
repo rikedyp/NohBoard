@@ -165,6 +165,8 @@ namespace ThoNohT.NohBoard.Legacy
                 keyCodes: keyCode.Singleton(),
                 normalText: normalText,
                 shiftText: shiftText,
+                altGrText: null,
+                altGrShiftText: null,
                 changeOnCaps: changeOnCaps);
 
             AddOrOverlap(definition, keyCode, newKeyDefinition);

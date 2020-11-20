@@ -58,6 +58,8 @@ namespace ThoNohT.NohBoard.Forms.Properties
             this.lblTextPosition = new System.Windows.Forms.Label();
             this.lblShiftText = new System.Windows.Forms.Label();
             this.txtShiftText = new System.Windows.Forms.TextBox();
+            this.txtAltGrText = new System.Windows.Forms.TextBox();
+            this.txtAltGrShiftText = new System.Windows.Forms.TextBox();
             this.lstKeyCodes = new System.Windows.Forms.ListBox();
             this.btnRemoveKeyCode = new System.Windows.Forms.Button();
             this.btnAddKeyCode = new System.Windows.Forms.Button();
@@ -389,6 +391,8 @@ namespace ThoNohT.NohBoard.Forms.Properties
         private System.Windows.Forms.Label lblTextPosition;
         private System.Windows.Forms.Label lblShiftText;
         private System.Windows.Forms.TextBox txtShiftText;
+        private System.Windows.Forms.TextBox txtAltGrText;
+        private System.Windows.Forms.TextBox txtAltGrShiftText;
         private System.Windows.Forms.ListBox lstKeyCodes;
         private System.Windows.Forms.Button btnRemoveKeyCode;
         private System.Windows.Forms.Button btnAddKeyCode;

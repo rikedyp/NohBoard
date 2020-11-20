@@ -25,6 +25,7 @@ namespace ThoNohT.NohBoard.Forms
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.Eventing.Reader;
     using System.Drawing;
     using System.Drawing.Text;
     using System.Linq;
@@ -47,8 +48,8 @@ namespace ThoNohT.NohBoard.Forms
         /// <summary>
         /// The back-brushes used for efficient drawing.
         /// </summary>
-        private readonly Dictionary<bool, Dictionary<bool, Brush>> backBrushes =
-            new Dictionary<bool, Dictionary<bool, Brush>>();
+        private readonly Dictionary<bool, Dictionary<bool, Dictionary<bool, Brush>>> backBrushes =
+            new Dictionary<bool, Dictionary<bool, Dictionary<bool, Brush>>>();
 
         /// <summary>
         /// The element currently under the cursor.
@@ -207,9 +208,13 @@ namespace ThoNohT.NohBoard.Forms
 
             foreach (var brush in this.backBrushes)
             {
-                foreach (var b in brush.Value)
-                    b.Value.Dispose();
-
+                foreach (var b0 in brush.Value)
+                {
+                    foreach (var b1 in b0.Value)
+                    {
+                        b1.Value.Dispose();
+                    }
+                }
                 brush.Value.Clear();
             }
             this.backBrushes.Clear();
@@ -217,35 +222,39 @@ namespace ThoNohT.NohBoard.Forms
             // Fill the back-brushes.
             foreach (var shift in new[] { false, true })
             {
-                this.backBrushes.Add(shift, new Dictionary<bool, Brush>());
-
-                foreach (var caps in new[] { false, true })
+                ///  this.backBrushes.Add(shift, new Dictionary<bool, Brush>());
+                this.backBrushes.Add(shift, new Dictionary<bool, Dictionary<bool, Brush>>());
+                foreach (var altGr in new[] { false, true })                  
                 {
-                    var bmp = new Bitmap(
-                        GlobalSettings.CurrentDefinition.Width,
-                        GlobalSettings.CurrentDefinition.Height);
-                    var g = Graphics.FromImage(bmp);
-
-                    // Render the background image if set.
-                    var cs = GlobalSettings.CurrentStyle;
-                    if (cs.BackgroundImageFileName != null && FileHelper.StyleImageExists(cs.BackgroundImageFileName))
+                    this.backBrushes[shift].Add(altGr, new Dictionary<bool, Brush>());
+                    foreach (var caps in new[] { false, true })
                     {
-                        g.DrawImage(ImageCache.Get(cs.BackgroundImageFileName), this.ClientRectangle);
+                        var bmp = new Bitmap(
+                            GlobalSettings.CurrentDefinition.Width,
+                            GlobalSettings.CurrentDefinition.Height);
+                        var g = Graphics.FromImage(bmp);
+
+                        // Render the background image if set.
+                        var cs = GlobalSettings.CurrentStyle;
+                        if (cs.BackgroundImageFileName != null && FileHelper.StyleImageExists(cs.BackgroundImageFileName))
+                        {
+                            g.DrawImage(ImageCache.Get(cs.BackgroundImageFileName), this.ClientRectangle);
+                        }
+
+                        // Render the individual keys.
+                        foreach (var def in GlobalSettings.CurrentDefinition.Elements)
+                        {
+                            if (def is KeyboardKeyDefinition) ((KeyboardKeyDefinition)def).Render(g, false, shift, altGr, caps);
+
+                            if (def is MouseKeyDefinition) ((MouseKeyDefinition)def).Render(g, false, shift, caps);
+
+                            if (def is MouseScrollDefinition) ((MouseScrollDefinition)def).Render(g, 0);
+
+                            // No need to render mouse speed indicators in backbrush.
+                        }
+
+                        this.backBrushes[shift][altGr].Add(caps, new TextureBrush(bmp));
                     }
-
-                    // Render the individual keys.
-                    foreach (var def in GlobalSettings.CurrentDefinition.Elements)
-                    {
-                        if (def is KeyboardKeyDefinition) ((KeyboardKeyDefinition)def).Render(g, false, shift, caps);
-
-                        if (def is MouseKeyDefinition) ((MouseKeyDefinition)def).Render(g, false, shift, caps);
-
-                        if (def is MouseScrollDefinition) ((MouseScrollDefinition)def).Render(g, 0);
-
-                        // No need to render mouse speed indicators in backbrush.
-                    }
-
-                    this.backBrushes[shift].Add(caps, new TextureBrush(bmp));
                 }
             }
 
@@ -594,8 +603,9 @@ namespace ThoNohT.NohBoard.Forms
                 return;
 
             // Fill the appropriate back brush.
+            var altGr = KeyboardState.CtrlDown && KeyboardState.AltDown;
             e.Graphics.FillRectangle(
-                this.backBrushes[KeyboardState.ShiftDown][KeyboardState.CapsActive],
+                this.backBrushes[KeyboardState.ShiftDown][altGr][KeyboardState.CapsActive],
                 new Rectangle(0, 0, GlobalSettings.CurrentDefinition.Width, GlobalSettings.CurrentDefinition.Height));
 
             // Render all keys.
@@ -664,8 +674,8 @@ namespace ThoNohT.NohBoard.Forms
                         && d.KeyCodes.ContainsAll(kkDef.KeyCodes))) pressed = false;
 
                 if (!pressed && !alwaysRender) return;
-
-                kkDef.Render(g, pressed, KeyboardState.ShiftDown, KeyboardState.CapsActive);
+                var altGr = KeyboardState.CtrlDown && KeyboardState.AltDown;
+                kkDef.Render(g, pressed, KeyboardState.ShiftDown, altGr, KeyboardState.CapsActive);
             }
             if (def is MouseKeyDefinition mkDef)
             {
